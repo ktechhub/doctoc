@@ -58,7 +58,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
         with:
-          bump_version_scheme: ${{ env.RELEASE_SCHEME }}
+          bump_version_scheme: ${{ vars.RELEASE_SCHEME }}
           release_body: "The official release for doctoc"
 
       - name: Check Release Output Parameters
