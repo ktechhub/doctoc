@@ -58,8 +58,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
         with:
-          bump_version_scheme: minor
-          release_body: "The official release for mtai"
+          bump_version_scheme: ${{ env.RELEASE_SCHEME }}
+          release_body: "The official release for doctoc"
 
       - name: Check Release Output Parameters
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -85,8 +85,8 @@ jobs:
           echo $VERSION
           python3 setup.py install
 
-      # Upload to mtai PyPi
-      - name: Build and Upload to mtai PyPi
+      # Upload to doctoc PyPi
+      - name: Build and Upload to doctoc PyPi
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           export VERSION=${{ steps.release.outputs.version }}

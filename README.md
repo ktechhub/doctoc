@@ -19,6 +19,10 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # DocToc
+
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://img.shields.io/badge/license-MIT-blue.svg)
+[![PyPI version](https://badge.fury.io/py/doctoc.svg)](https://badge.fury.io/py/doctoc)
+
 DocToc is a command-line tool built with Python that automatically generates and updates table of contents (TOC) for Markdown files. It scans through your Markdown file, identifies headers, and creates a TOC with clickable links.
 
 ## Prerequisites
