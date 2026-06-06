@@ -1,14 +1,34 @@
-## Description
+## Summary
 
 <!-- What does this PR do? Why? -->
 
-## Changes
+## Type of change
 
-<!-- Bullet list of what changed -->
+<!-- Your PR title must follow conventional commits format: type(scope): description -->
+<!-- Allowed types: feat | fix | docs | style | refactor | perf | test | build | ci | chore | revert -->
 
-## Testing
+- [ ] `feat` – new feature
+- [ ] `fix` – bug fix
+- [ ] `docs` – documentation only
+- [ ] `refactor` – code change with no feature/fix
+- [ ] `test` – adding or updating tests
+- [ ] `chore` – maintenance (deps, config, etc.)
+- [ ] `ci` – CI/CD changes
 
-<!-- How was this tested? Any edge cases covered? -->
+## How to test
+
+<!-- Steps to verify this works correctly -->
+
+1. 
+2. 
+
+## Checklist
+
+- [ ] Tests pass locally (`pytest tests/`)
+- [ ] Code is formatted (`black .`)
+- [ ] PR title follows `type: description` or `type(scope): description`
+- [ ] Relevant docs / README updated (if applicable)
+
 
 ---
 
