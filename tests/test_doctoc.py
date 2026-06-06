@@ -2,10 +2,10 @@ import pytest
 from doctoc.markdown import as_link, escape, get_links, headers, toc
 from doctoc.core import modify_and_write, TOC_START_TAG, TOC_END_TAG
 
-
 # ---------------------------------------------------------------------------
 # headers()
 # ---------------------------------------------------------------------------
+
 
 def test_headers_basic():
     md = "# H1\n## H2\n### H3"
@@ -41,6 +41,7 @@ def test_headers_ignores_indented_code_block():
 # as_link()
 # ---------------------------------------------------------------------------
 
+
 def test_as_link_basic():
     assert as_link("Header with spaces") == "header-with-spaces"
 
@@ -61,6 +62,7 @@ def test_as_link_leading_trailing_hashes():
 # escape()
 # ---------------------------------------------------------------------------
 
+
 def test_escape_brackets():
     assert escape("Example [String]") == "Example \\[String\\]"
 
@@ -72,6 +74,7 @@ def test_escape_no_brackets():
 # ---------------------------------------------------------------------------
 # get_links()
 # ---------------------------------------------------------------------------
+
 
 def test_get_links_basic():
     md = "[Link](#header)"
@@ -98,6 +101,7 @@ def test_get_links_line_numbers():
 # ---------------------------------------------------------------------------
 # toc()
 # ---------------------------------------------------------------------------
+
 
 def test_toc_basic():
     md = "# H1\n## H2\n### H3"
@@ -158,6 +162,7 @@ def test_toc_special_chars_in_header():
 # ---------------------------------------------------------------------------
 # modify_and_write()
 # ---------------------------------------------------------------------------
+
 
 def test_modify_and_write_inserts_toc(tmp_path):
     md_file = tmp_path / "test.md"

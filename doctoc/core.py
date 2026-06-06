@@ -7,9 +7,7 @@ TOC_END_TAG = (
     "<!-- END doctoc generated TOC please keep comment here to allow auto update -->"
 )
 
-_TOC_HEADER_TEMPLATE = (
-    "**Table of Contents**  *generated with [DocToc](https://github.com/ktechhub/doctoc)*"
-)
+_TOC_HEADER_TEMPLATE = "**Table of Contents**  *generated with [DocToc](https://github.com/ktechhub/doctoc)*"
 
 
 def _toc_block(table_of_contents, title):
@@ -35,7 +33,9 @@ def modify_and_write(path, outfile=None, title=None, max_depth=None):
 
     if start_index != -1 and end_index != -1:
         end_index += len(TOC_END_TAG)
-        new_markdown = markdown[:start_index] + toc_section + "\n" + markdown[end_index:]
+        new_markdown = (
+            markdown[:start_index] + toc_section + "\n" + markdown[end_index:]
+        )
     else:
         new_markdown = (
             toc_section

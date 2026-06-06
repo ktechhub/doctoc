@@ -12,7 +12,10 @@ REQUEST_TIMEOUT = 10
 
 
 def _check_links(markdown_file, contents):
-    click.echo(click.style(f"Checking hyperlinks in {markdown_file}...", fg="yellow"), color=True)
+    click.echo(
+        click.style(f"Checking hyperlinks in {markdown_file}...", fg="yellow"),
+        color=True,
+    )
     valid_http_fragments = {"#" + as_link(h) for (_, h) in headers(contents)}
 
     for text, link, _, _ in get_links(contents):
@@ -20,7 +23,10 @@ def _check_links(markdown_file, contents):
         if link.startswith("#"):
             ok = link in valid_http_fragments
             click.echo(
-                click.style(f"{'VALID' if ok else 'INVALID'}: {label}", fg="green" if ok else "red"),
+                click.style(
+                    f"{'VALID' if ok else 'INVALID'}: {label}",
+                    fg="green" if ok else "red",
+                ),
                 color=True,
             )
         elif link.startswith("http://") or link.startswith("https://"):
@@ -34,11 +40,16 @@ def _check_links(markdown_file, contents):
                 click.echo(click.style(f"ERROR: {label} ({e})", fg="red"), color=True)
                 continue
             click.echo(
-                click.style(f"{'VALID' if ok else 'INVALID'}: {label}", fg="green" if ok else "red"),
+                click.style(
+                    f"{'VALID' if ok else 'INVALID'}: {label}",
+                    fg="green" if ok else "red",
+                ),
                 color=True,
             )
         else:
-            click.echo(click.style(f"UNRECOGNIZED LINK TYPE: {label}", fg="yellow"), color=True)
+            click.echo(
+                click.style(f"UNRECOGNIZED LINK TYPE: {label}", fg="yellow"), color=True
+            )
 
 
 def _resolve_paths(patterns):
@@ -55,10 +66,20 @@ def _resolve_paths(patterns):
 
 @click.command()
 @click.argument("markdown_files", nargs=-1, required=True)
-@click.option("--outfile", "-o", help="Output file (only valid when processing a single file).")
-@click.option("--check-links", "-cl", is_flag=True, help="Check validity of hyperlinks.")
+@click.option(
+    "--outfile", "-o", help="Output file (only valid when processing a single file)."
+)
+@click.option(
+    "--check-links", "-cl", is_flag=True, help="Check validity of hyperlinks."
+)
 @click.option("--title", "-t", default=None, help="Custom TOC title line.")
-@click.option("--max-depth", "-d", default=None, type=int, help="Maximum heading depth to include in TOC.")
+@click.option(
+    "--max-depth",
+    "-d",
+    default=None,
+    type=int,
+    help="Maximum heading depth to include in TOC.",
+)
 def main(markdown_files, outfile, check_links, title, max_depth):
     """Generate or update a table of contents for one or more Markdown files.
 
@@ -68,7 +89,9 @@ def main(markdown_files, outfile, check_links, title, max_depth):
 
     if outfile and len(paths) > 1:
         click.echo(
-            click.style("--outfile cannot be used with multiple input files.", fg="red"),
+            click.style(
+                "--outfile cannot be used with multiple input files.", fg="red"
+            ),
             color=True,
         )
         sys.exit(1)
@@ -80,8 +103,12 @@ def main(markdown_files, outfile, check_links, title, max_depth):
                 with open(path) as fp:
                     original_contents = fp.read()
 
-            dest = modify_and_write(path, outfile=outfile, title=title, max_depth=max_depth)
-            click.echo(click.style(f"Success: wrote TOC to {dest}", fg="green"), color=True)
+            dest = modify_and_write(
+                path, outfile=outfile, title=title, max_depth=max_depth
+            )
+            click.echo(
+                click.style(f"Success: wrote TOC to {dest}", fg="green"), color=True
+            )
 
             if check_links:
                 _check_links(path, original_contents)
