@@ -4,15 +4,16 @@
 
 <!---toc start-->
 
-- [DocToc](#doctoc)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Usage](#usage)
-    - [Options:](#options)
-  - [Features](#features)
-  - [GitHub](#github)
-  - [License](#license)
-    - [Contribution](#contribution)
+* [DocToc](#doctoc)
+  * [Prerequisites](#prerequisites)
+  * [Installation](#installation)
+  * [Usage](#usage)
+  * [Options](#options)
+  * [Examples](#examples)
+  * [Features](#features)
+  * [GitHub](#github)
+  * [License](#license)
+  * [Contribution](#contribution)
 
 <!---toc end-->
 
@@ -23,94 +24,111 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://img.shields.io/badge/license-MIT-blue.svg)
 [![PyPI version](https://badge.fury.io/py/doctoc.svg)](https://badge.fury.io/py/doctoc)
 
-DocToc is a command-line tool built with Python that automatically generates and updates table of contents (TOC) for Markdown files. It scans through your Markdown file, identifies headers, and creates a TOC with clickable links.
+DocToc is a command-line tool that automatically generates and updates a table of contents (TOC) for Markdown files. It scans your Markdown, identifies headers, and inserts a TOC with clickable links — skipping headers inside fenced code blocks.
 
 ## Prerequisites
-Before installing DocToc, ensure you have the following:
-- Python 3.6+
-- pip (Python package installer)
+
+- Python 3.8+
+- pip
 
 ## Installation
-You can install DocToc using pip:
 
 ```sh
 pip install doctoc
 ```
-Alternatively, you can install it from the source on GitHub:
+
+Or from source:
 
 ```sh
 git clone https://github.com/ktechhub/doctoc.git
 cd doctoc
-python setup.py install
+pip install .
 ```
 
 ## Usage
-Generate a table of contents for a Markdown file:
 
 ```sh
-doctoc --help
-Usage: doctoc [OPTIONS] MARKDOWN_FILE
-
-  Generate or update a table of contents for Markdown files and optionally
-  check hyperlinks.
-
-  Args:
-  markdown_file (str): Path to the Markdown file to process.
-  outfile (str, optional): Output file path. If specified, writes the modified content to this file instead of overwriting the original.
-  check_links (bool): Flag to enable checking the validity of hyperlinks found in the Markdown file.
-
-Options:
-  -o, --outfile TEXT  Specify an output file instead of overwriting.
-  -cl, --check-links  Check validity of hyperlinks.
-  --help              Show this message and exit.
+doctoc [OPTIONS] MARKDOWN_FILES...
 ```
 
-### Options:
+`MARKDOWN_FILES` accepts one or more file paths or glob patterns:
 
-- `--outfile`: Specify an output file instead of overwriting.
-- `--check-links`: Check the validity of hyperlinks within the Markdown file.
+```sh
+doctoc README.md
+doctoc docs/README.md CHANGELOG.md
+doctoc '**/*.md'
+```
 
-Example with options:
+On the first run, DocToc inserts the TOC at the top of the file. On subsequent runs it updates the existing TOC in place.
+
+## Options
+
+| Option | Short | Description |
+|---|---|---|
+| `--outfile PATH` | `-o` | Write output to a separate file instead of overwriting the input (single-file only). |
+| `--check-links` | `-cl` | Validate all hyperlinks found in the file. |
+| `--title TEXT` | `-t` | Custom title line for the TOC block (default: bold "Table of Contents" with attribution). |
+| `--max-depth INT` | `-d` | Limit TOC to headings up to this depth (e.g. `2` includes only H1 and H2). |
+| `--help` | | Show help and exit. |
+
+## Examples
+
+**Basic — generate or update TOC:**
+```sh
+doctoc README.md
+# Success: wrote TOC to README.md
+```
+
+**Custom output file:**
+```sh
+doctoc README.md -o README_with_toc.md
+# Success: wrote TOC to README_with_toc.md
+```
+
+**Limit TOC depth to H1 and H2 only:**
+```sh
+doctoc README.md --max-depth 2
+```
+
+**Custom TOC title:**
+```sh
+doctoc README.md --title "## Contents"
+```
+
+**Check hyperlinks after generating TOC:**
 ```sh
 doctoc README.md --check-links
-```
-Output
-```sh
-Success: wrote TOC to README.md
-Checking hyperlinks...
-VALID: [DocToc](https://github.com/ktechhub/doctoc)
-VALID: [DocToc](#doctoc)
-VALID: [Prerequisites](#prerequisites)
-VALID: [Installation](#installation)
-VALID: [Usage](#usage)
-VALID: [Options:](#options)
-VALID: [Features](#features)
-VALID: [GitHub](#github)
-VALID: [License](#license)
-VALID: [GitHub repository](https://github.com/ktechhub/doctoc)
+# Success: wrote TOC to README.md
+# Checking hyperlinks in README.md...
+# VALID: [DocToc](#doctoc)
+# VALID: [Installation](#installation)
+# VALID: [GitHub repository](https://github.com/ktechhub/doctoc)
+# INVALID: [Broken](#missing-section)
 ```
 
+**Process all Markdown files recursively:**
 ```sh
-doctoc README.md --outfile README_with_toc.md
-```
-Output
-```sh
-Success: wrote TOC to README_with_toc.md
-```
-```sh
-doctoc README.md --outfile README_with_toc.md --check-links
+doctoc '**/*.md'
 ```
 
 ## Features
-- Automatically generates a TOC based on Markdown headers.
-- Supports customization with options to specify output file and check link validity.
-- Simple and easy to use with a command-line interface.
+
+- Generates and updates a TOC based on Markdown headers.
+- Skips headers inside fenced code blocks (` ``` ` and `~~~`).
+- Supports multiple files and glob patterns in a single invocation.
+- `--max-depth` to limit which heading levels appear in the TOC.
+- `--title` to customise the TOC heading line.
+- Link checker validates both internal anchor links and external HTTP(S) URLs, with a timeout and clear error output.
+- Writes to an optional output file instead of overwriting the source.
 
 ## GitHub
+
 For more details, visit the [GitHub repository](https://github.com/ktechhub/doctoc).
 
 ## License
-This project is licensed under the MIT License - see the LICENSE file for details.
 
-### Contribution
-If you want to contribute, kindly see this **[contribution](https://github.com/ktechhub/doctoc/tree/main/contribution.md)**
+This project is licensed under the MIT License — see the LICENSE file for details.
+
+## Contribution
+
+If you want to contribute, kindly see **[contribution](https://github.com/ktechhub/doctoc/tree/main/contribution.md)**.

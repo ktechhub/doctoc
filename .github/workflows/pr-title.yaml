@@ -1,0 +1,36 @@
+name: PR Title Check
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  validate:
+    name: Validate conventional commit title
+    runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Allowed conventional commit types
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          # Scope is optional (e.g. feat(cli): add --version flag)
+          requireScope: false
+          # Subject line length limit
+          subjectPattern: ^.{1,72}$
+          subjectPatternError: |
+            The PR title subject must be 72 characters or less.
+            Example: "feat: add SSH key passphrase support"
