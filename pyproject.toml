@@ -7,7 +7,7 @@ name = "doctoc"
 version = "0.0.1"
 description = "Generate table of contents for Markdown files"
 readme = "README.md"
-license = { text = "MIT" }
+license = { file = "LICENSE" }
 requires-python = ">=3.8"
 authors = [{ name = "Ktechhub", email = "mm@ktechhub.com" }]
 keywords = ["markdown", "table of contents"]
