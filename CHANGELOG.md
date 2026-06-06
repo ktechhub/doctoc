@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/ktechhub/doctoc/compare/v1.1.0...v1.1.1) (2026-06-06)
+
+
+### Bug Fixes
+
+* correct license metadata and switch to pypa publish action ([#24](https://github.com/ktechhub/doctoc/issues/24)) ([d82a4d2](https://github.com/ktechhub/doctoc/commit/d82a4d22bbf26be70bcbedfbda4690476bc79473))
+* use license file ref, split publish into pypa action on release event ([fcf510c](https://github.com/ktechhub/doctoc/commit/fcf510cc49fb0fc9e671f0c4539f4262f8c22320))
+
 ## [1.1.0](https://github.com/ktechhub/doctoc/compare/v1.0.0...v1.1.0) (2026-06-06)
 
 
