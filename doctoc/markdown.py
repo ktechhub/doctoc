@@ -34,11 +34,15 @@ def _replace_ital_bold(s):
 
 def as_link(x):
     res = re.sub(
-        r"[^-\w\s]",
+        r"[^-\w\s.]",
         "",
-        re.sub(r"\s+", "-", _strip(x.lower())),
+        _strip(x.lower()),
         flags=re.U,
     )
+    # Whitespace and periods both become hyphens; a run of the two together
+    # (e.g. the ". " in "1. My header") collapses to a single hyphen instead
+    # of producing "1--my-header".
+    res = re.sub(r"[\s.]+", "-", res)
     res = _replace_ital_bold(res)
 
     if res.endswith("--"):
