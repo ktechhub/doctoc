@@ -1,0 +1,35 @@
+name: Feature request
+description: Propose new behavior or an option that doesn't exist yet
+labels: ["type:enhancement"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What
+      description: What should doctoc do that it doesn't today? Be specific about the proposed CLI flag/behavior if you have one in mind.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: What problem does this solve, or what's the actual use case? ("Would be nice" isn't enough on its own — a concrete example helps a lot.)
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current behavior
+      description: What happens today instead, if relevant.
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How would you know this is done? (Optional, but it's what turns an idea into something actionable — including for an automated contributor.)
+    validations:
+      required: false
