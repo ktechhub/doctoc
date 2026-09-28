@@ -51,11 +51,21 @@ def test_as_link_special_chars():
 
 
 def test_as_link_numbers():
-    assert as_link("Section 1.2") == "section-12"
+    assert as_link("Section 1.2") == "section-1-2"
 
 
 def test_as_link_leading_trailing_hashes():
     assert as_link("## My Header ##") == "my-header"
+
+
+def test_as_link_numbered_heading():
+    # GitHub converts periods between numbers to hyphens too, not just spaces.
+    assert as_link("1.1 My first header") == "1-1-my-first-header"
+
+
+def test_as_link_numbered_heading_no_double_hyphen():
+    # A period immediately followed by a space must not produce a double hyphen.
+    assert as_link("1. My first header") == "1-my-first-header"
 
 
 # ---------------------------------------------------------------------------
