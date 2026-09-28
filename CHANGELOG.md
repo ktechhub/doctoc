@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.2](https://github.com/ktechhub/doctoc/compare/v1.1.1...v1.1.2) (2026-09-28)
+
+
+### Bug Fixes
+
+* convert periods to hyphens in TOC anchor links for numbered headings ([9ae7036](https://github.com/ktechhub/doctoc/commit/9ae7036fcaa9161645ae8b898a651821bd7a2690))
+* convert periods to hyphens in TOC anchor links for numbered headings ([#34](https://github.com/ktechhub/doctoc/issues/34)) ([af1c1a4](https://github.com/ktechhub/doctoc/commit/af1c1a46d72de3b0c681a302cd23247179da0db4))
+
 ## [1.1.1](https://github.com/ktechhub/doctoc/compare/v1.1.0...v1.1.1) (2026-06-06)
 
 
