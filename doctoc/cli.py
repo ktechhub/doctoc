@@ -5,7 +5,7 @@ import sys
 import click
 import requests
 
-from .core import modify_and_write
+from .core import is_current, modify_and_write
 from .markdown import MarkdownError, as_link, get_links, headers
 
 REQUEST_TIMEOUT = 10
@@ -80,7 +80,13 @@ def _resolve_paths(patterns):
     type=int,
     help="Maximum heading depth to include in TOC.",
 )
-def main(markdown_files, outfile, check_links, title, max_depth):
+@click.option(
+    "--check",
+    "-c",
+    is_flag=True,
+    help="Check whether the TOC is up to date without writing; exit non-zero if stale.",
+)
+def main(markdown_files, outfile, check_links, title, max_depth, check):
     """Generate or update a table of contents for one or more Markdown files.
 
     MARKDOWN_FILES may be file paths or glob patterns (e.g. '**/*.md').
@@ -99,6 +105,14 @@ def main(markdown_files, outfile, check_links, title, max_depth):
     had_error = False
     for path in paths:
         try:
+            if check:
+                if is_current(path, title=title, max_depth=max_depth):
+                    click.echo(click.style(f"OK: {path} is up to date", fg="green"))
+                else:
+                    click.echo(click.style(f"STALE: {path} is out of date", fg="red"))
+                    had_error = True
+                continue
+
             if check_links:
                 with open(path) as fp:
                     original_contents = fp.read()
