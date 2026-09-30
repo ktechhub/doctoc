@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/ktechhub/doctoc/compare/v1.1.2...v1.2.0) (2026-09-30)
+
+
+### Features
+
+* add --check mode to validate TOC freshness without writing ([884f3c4](https://github.com/ktechhub/doctoc/commit/884f3c49598e6fe26f3242589ffaca3798992d00))
+* add --check mode to validate TOC freshness without writing ([#36](https://github.com/ktechhub/doctoc/issues/36)) ([6572527](https://github.com/ktechhub/doctoc/commit/65725273a98380a2820cb65288986d73ea7fe09d))
+
 ## [1.1.2](https://github.com/ktechhub/doctoc/compare/v1.1.1...v1.1.2) (2026-09-28)
 
 
