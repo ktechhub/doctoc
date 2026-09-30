@@ -69,6 +69,7 @@ On the first run, DocToc inserts the TOC at the top of the file. On subsequent r
 | `--check-links` | `-cl` | Validate all hyperlinks found in the file. |
 | `--title TEXT` | `-t` | Custom title line for the TOC block (default: bold "Table of Contents" with attribution). |
 | `--max-depth INT` | `-d` | Limit TOC to headings up to this depth (e.g. `2` includes only H1 and H2). |
+| `--check` | `-c` | Check whether the TOC is up to date without writing; exit non-zero if any file is stale. |
 | `--help` | | Show help and exit. |
 
 ## Examples
@@ -111,6 +112,13 @@ doctoc README.md --check-links
 doctoc '**/*.md'
 ```
 
+**CI check — fail if a TOC is stale, without writing:**
+```sh
+doctoc --check '**/*.md'
+# OK: README.md is up to date
+# STALE: docs/CONTRIBUTING.md is out of date
+```
+
 ## Features
 
 - Generates and updates a TOC based on Markdown headers.
@@ -120,6 +128,7 @@ doctoc '**/*.md'
 - `--title` to customise the TOC heading line.
 - Link checker validates both internal anchor links and external HTTP(S) URLs, with a timeout and clear error output.
 - Writes to an optional output file instead of overwriting the source.
+- `--check` for CI: reports stale TOCs with a non-zero exit code, without modifying any file.
 
 ## GitHub
 

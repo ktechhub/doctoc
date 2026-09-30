@@ -1,6 +1,8 @@
 import pytest
+from click.testing import CliRunner
+from doctoc.cli import main
 from doctoc.markdown import as_link, escape, get_links, headers, toc
-from doctoc.core import modify_and_write, TOC_START_TAG, TOC_END_TAG
+from doctoc.core import is_current, modify_and_write, TOC_START_TAG, TOC_END_TAG
 
 # ---------------------------------------------------------------------------
 # headers()
@@ -230,6 +232,102 @@ def test_modify_and_write_max_depth(tmp_path):
     assert "H1" in content
     assert "H2" in content
     assert "H3" not in content.split(TOC_END_TAG)[0]
+
+
+def test_modify_and_write_is_idempotent(tmp_path):
+    # Re-running on a file that already has a current TOC must not change it
+    # (previously each re-run inserted an extra blank line, growing the file
+    # without bound).
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title 1\n\n## Subtitle 1.1\n")
+
+    modify_and_write(md_file)
+    once = md_file.read_text()
+    modify_and_write(md_file)
+    twice = md_file.read_text()
+
+    assert once == twice
+
+
+# ---------------------------------------------------------------------------
+# is_current() / --check
+# ---------------------------------------------------------------------------
+
+
+def test_is_current_false_when_no_toc_yet(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title 1\n\n## Subtitle 1.1\n")
+
+    assert is_current(md_file) is False
+
+
+def test_is_current_true_after_write(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title 1\n\n## Subtitle 1.1\n")
+
+    modify_and_write(md_file)
+    assert is_current(md_file) is True
+
+
+def test_is_current_false_when_toc_stale(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title 1\n\n## Subtitle 1.1\n")
+
+    modify_and_write(md_file)
+    with md_file.open("a") as fp:
+        fp.write("\n## New Section\n")
+
+    assert is_current(md_file) is False
+
+
+def test_is_current_does_not_write(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title 1\n")
+
+    is_current(md_file)
+    assert md_file.read_text() == "# Title 1\n"
+
+
+def test_cli_check_exits_zero_when_current(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title 1\n")
+    modify_and_write(md_file)
+
+    result = CliRunner().invoke(main, ["--check", str(md_file)])
+    assert result.exit_code == 0
+    assert "OK" in result.output
+
+
+def test_cli_check_exits_nonzero_when_stale(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title 1\n")
+
+    result = CliRunner().invoke(main, ["--check", str(md_file)])
+    assert result.exit_code != 0
+    assert "STALE" in result.output
+    assert str(md_file) in result.output
+
+
+def test_cli_check_does_not_write(tmp_path):
+    md_file = tmp_path / "test.md"
+    original = "# Title 1\n"
+    md_file.write_text(original)
+
+    CliRunner().invoke(main, ["--check", str(md_file)])
+    assert md_file.read_text() == original
+
+
+def test_cli_check_reports_multiple_files(tmp_path):
+    stale_file = tmp_path / "stale.md"
+    stale_file.write_text("# Title 1\n")
+    current_file = tmp_path / "current.md"
+    current_file.write_text("# Title 2\n")
+    modify_and_write(current_file)
+
+    result = CliRunner().invoke(main, ["--check", str(stale_file), str(current_file)])
+    assert result.exit_code != 0
+    assert f"STALE: {stale_file}" in result.output
+    assert f"OK: {current_file}" in result.output
 
 
 if __name__ == "__main__":
