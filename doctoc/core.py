@@ -21,8 +21,8 @@ def _toc_block(table_of_contents, title):
     )
 
 
-def _render(markdown, title=None, max_depth=None):
-    table_of_contents = toc(markdown, max_depth=max_depth)
+def _render(markdown, title=None, max_depth=None, exclude=None):
+    table_of_contents = toc(markdown, max_depth=max_depth, exclude=exclude)
     toc_section = _toc_block(table_of_contents, title)
 
     start_index = markdown.find(TOC_START_TAG)
@@ -44,11 +44,11 @@ def _render(markdown, title=None, max_depth=None):
         )
 
 
-def modify_and_write(path, outfile=None, title=None, max_depth=None):
+def modify_and_write(path, outfile=None, title=None, max_depth=None, exclude=None):
     with open(path) as fp:
         markdown = fp.read()
 
-    new_markdown = _render(markdown, title=title, max_depth=max_depth)
+    new_markdown = _render(markdown, title=title, max_depth=max_depth, exclude=exclude)
 
     dest = outfile or path
     with open(dest, "w") as fp:
@@ -57,7 +57,7 @@ def modify_and_write(path, outfile=None, title=None, max_depth=None):
     return dest
 
 
-def is_current(path, title=None, max_depth=None):
+def is_current(path, title=None, max_depth=None, exclude=None):
     """Return True if path's TOC already matches what doctoc would generate.
 
     Never writes to disk.
@@ -65,4 +65,6 @@ def is_current(path, title=None, max_depth=None):
     with open(path) as fp:
         markdown = fp.read()
 
-    return markdown == _render(markdown, title=title, max_depth=max_depth)
+    return markdown == _render(
+        markdown, title=title, max_depth=max_depth, exclude=exclude
+    )

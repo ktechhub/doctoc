@@ -70,6 +70,7 @@ On the first run, DocToc inserts the TOC at the top of the file. On subsequent r
 | `--title TEXT` | `-t` | Custom title line for the TOC block (default: bold "Table of Contents" with attribution). |
 | `--max-depth INT` | `-d` | Limit TOC to headings up to this depth (e.g. `2` includes only H1 and H2). |
 | `--check` | `-c` | Check whether the TOC is up to date without writing; exit non-zero if any file is stale. |
+| `--exclude TEXT` | `-e` | Exclude headers whose text contains this value from the TOC (repeatable for multiple exclusions). |
 | `--help` | | Show help and exit. |
 
 ## Examples
@@ -107,6 +108,11 @@ doctoc README.md --check-links
 # INVALID: [Broken](#missing-section)
 ```
 
+**Exclude specific headers from the TOC:**
+```sh
+doctoc README.md --exclude "Appendix"
+```
+
 **Process all Markdown files recursively:**
 ```sh
 doctoc '**/*.md'
@@ -125,6 +131,7 @@ doctoc --check '**/*.md'
 - Skips headers inside fenced code blocks (` ``` ` and `~~~`).
 - Supports multiple files and glob patterns in a single invocation.
 - `--max-depth` to limit which heading levels appear in the TOC.
+- `--exclude` to omit specific headers from the TOC by matching text (repeatable).
 - `--title` to customise the TOC heading line.
 - Link checker validates both internal anchor links and external HTTP(S) URLs, with a timeout and clear error output.
 - Writes to an optional output file instead of overwriting the source.

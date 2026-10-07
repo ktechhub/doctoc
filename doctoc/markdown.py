@@ -66,13 +66,15 @@ def get_links(md_string):
             yield link_text, link_url, line_number, col_start
 
 
-def toc(md_string, max_depth=None):
+def toc(md_string, max_depth=None, exclude=None):
     entries = []
     n_seen = collections.defaultdict(int)
     min_level = None
 
     for level, header in headers(md_string):
         if max_depth is not None and level > max_depth:
+            continue
+        if exclude and any(pattern in header for pattern in exclude):
             continue
         if min_level is None:
             min_level = level

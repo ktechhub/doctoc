@@ -171,6 +171,40 @@ def test_toc_special_chars_in_header():
     assert "\\[World\\]" in result
 
 
+def test_toc_exclude_no_match():
+    md = "# H1\n## H2"
+    result = toc(md, exclude=["Appendix"])
+    assert "H1" in result
+    assert "H2" in result
+
+
+def test_toc_exclude_one_match():
+    md = "# H1\n## Appendix\n## H2"
+    result = toc(md, exclude=["Appendix"])
+    assert "H1" in result
+    assert "H2" in result
+    assert "Appendix" not in result
+
+
+def test_toc_exclude_multiple_values():
+    md = "# H1\n## Appendix\n## Notes\n## H2"
+    result = toc(md, exclude=["Appendix", "Notes"])
+    assert "H1" in result
+    assert "H2" in result
+    assert "Appendix" not in result
+    assert "Notes" not in result
+
+
+def test_toc_exclude_preserves_nesting_of_remaining_headers():
+    # Excluding the top-level header should not shift the indentation
+    # baseline for the remaining (deeper) headers.
+    md = "# Appendix\n## H1\n### H2"
+    result = toc(md, exclude=["Appendix"])
+    lines = result.split("\n")
+    assert lines[0].startswith("* [H1]")
+    assert lines[1].startswith("  * [H2]")
+
+
 # ---------------------------------------------------------------------------
 # modify_and_write()
 # ---------------------------------------------------------------------------
@@ -315,6 +349,31 @@ def test_cli_check_does_not_write(tmp_path):
 
     CliRunner().invoke(main, ["--check", str(md_file)])
     assert md_file.read_text() == original
+
+
+def test_cli_exclude_option(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title\n## Appendix\n## Notes\n")
+
+    result = CliRunner().invoke(main, ["--exclude", "Appendix", str(md_file)])
+    assert result.exit_code == 0
+    toc_section = md_file.read_text().split(TOC_END_TAG)[0]
+    assert "Notes" in toc_section
+    assert "Appendix" not in toc_section
+
+
+def test_cli_exclude_option_multiple_values(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title\n## Appendix\n## Notes\n## Keep\n")
+
+    result = CliRunner().invoke(
+        main, ["--exclude", "Appendix", "--exclude", "Notes", str(md_file)]
+    )
+    assert result.exit_code == 0
+    toc_section = md_file.read_text().split(TOC_END_TAG)[0]
+    assert "Keep" in toc_section
+    assert "Appendix" not in toc_section
+    assert "Notes" not in toc_section
 
 
 def test_cli_check_reports_multiple_files(tmp_path):
