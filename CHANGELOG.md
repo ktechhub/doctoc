@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0](https://github.com/ktechhub/doctoc/compare/v1.2.0...v1.3.0) (2026-10-07)
+
+
+### Features
+
+* add --exclude option to omit specific headers from the TOC ([bc43735](https://github.com/ktechhub/doctoc/commit/bc4373519ef2e51dcff0f4513052713a8c5fe1c1))
+* add --exclude option to omit specific headers from the TOC ([#42](https://github.com/ktechhub/doctoc/issues/42)) ([21226d3](https://github.com/ktechhub/doctoc/commit/21226d3ea058d487b508cf5b45d1e1682eea4762))
+
 ## [1.2.0](https://github.com/ktechhub/doctoc/compare/v1.1.2...v1.2.0) (2026-09-30)
 
 
