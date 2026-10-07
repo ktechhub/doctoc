@@ -86,7 +86,14 @@ def _resolve_paths(patterns):
     is_flag=True,
     help="Check whether the TOC is up to date without writing; exit non-zero if stale.",
 )
-def main(markdown_files, outfile, check_links, title, max_depth, check):
+@click.option(
+    "--exclude",
+    "-e",
+    multiple=True,
+    help="Exclude headers whose text contains this value from the TOC "
+    "(repeatable for multiple exclusions).",
+)
+def main(markdown_files, outfile, check_links, title, max_depth, check, exclude):
     """Generate or update a table of contents for one or more Markdown files.
 
     MARKDOWN_FILES may be file paths or glob patterns (e.g. '**/*.md').
@@ -106,7 +113,7 @@ def main(markdown_files, outfile, check_links, title, max_depth, check):
     for path in paths:
         try:
             if check:
-                if is_current(path, title=title, max_depth=max_depth):
+                if is_current(path, title=title, max_depth=max_depth, exclude=exclude):
                     click.echo(click.style(f"OK: {path} is up to date", fg="green"))
                 else:
                     click.echo(click.style(f"STALE: {path} is out of date", fg="red"))
@@ -118,7 +125,7 @@ def main(markdown_files, outfile, check_links, title, max_depth, check):
                     original_contents = fp.read()
 
             dest = modify_and_write(
-                path, outfile=outfile, title=title, max_depth=max_depth
+                path, outfile=outfile, title=title, max_depth=max_depth, exclude=exclude
             )
             click.echo(
                 click.style(f"Success: wrote TOC to {dest}", fg="green"), color=True
