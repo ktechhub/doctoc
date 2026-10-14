@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.0](https://github.com/ktechhub/doctoc/compare/v1.3.0...v1.4.0) (2026-10-14)
+
+
+### Features
+
+* add --dry-run flag to preview TOC changes without writing files ([c89fc79](https://github.com/ktechhub/doctoc/commit/c89fc79ddd80d6b403f80463431ff95f19f7115a))
+* add --dry-run flag to preview TOC changes without writing files ([#44](https://github.com/ktechhub/doctoc/issues/44)) ([e97987e](https://github.com/ktechhub/doctoc/commit/e97987ef2dab10c5cd4c9860a46eb51c6d1803bd))
+
 ## [1.3.0](https://github.com/ktechhub/doctoc/compare/v1.2.0...v1.3.0) (2026-10-07)
 
 
