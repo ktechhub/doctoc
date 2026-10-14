@@ -1,3 +1,5 @@
+import difflib
+
 from .markdown import toc
 
 TOC_START_TAG = (
@@ -55,6 +57,29 @@ def modify_and_write(path, outfile=None, title=None, max_depth=None, exclude=Non
         fp.write(new_markdown)
 
     return dest
+
+
+def render_diff(path, title=None, max_depth=None, exclude=None):
+    """Return a unified diff of what modify_and_write would change, without writing.
+
+    Returns an empty string if path's TOC is already current.
+    """
+    with open(path) as fp:
+        markdown = fp.read()
+
+    new_markdown = _render(markdown, title=title, max_depth=max_depth, exclude=exclude)
+    if new_markdown == markdown:
+        return ""
+
+    path_str = str(path)
+    return "".join(
+        difflib.unified_diff(
+            markdown.splitlines(keepends=True),
+            new_markdown.splitlines(keepends=True),
+            fromfile=path_str,
+            tofile=path_str,
+        )
+    )
 
 
 def is_current(path, title=None, max_depth=None, exclude=None):

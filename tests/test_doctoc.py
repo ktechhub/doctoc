@@ -2,7 +2,13 @@ import pytest
 from click.testing import CliRunner
 from doctoc.cli import main
 from doctoc.markdown import as_link, escape, get_links, headers, toc
-from doctoc.core import is_current, modify_and_write, TOC_START_TAG, TOC_END_TAG
+from doctoc.core import (
+    is_current,
+    modify_and_write,
+    render_diff,
+    TOC_START_TAG,
+    TOC_END_TAG,
+)
 
 # ---------------------------------------------------------------------------
 # headers()
@@ -374,6 +380,83 @@ def test_cli_exclude_option_multiple_values(tmp_path):
     assert "Keep" in toc_section
     assert "Appendix" not in toc_section
     assert "Notes" not in toc_section
+
+
+# ---------------------------------------------------------------------------
+# render_diff() / --dry-run
+# ---------------------------------------------------------------------------
+
+
+def test_render_diff_shows_accurate_diff(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title 1\n\n## Subtitle 1.1\n")
+
+    diff = render_diff(md_file)
+    assert diff.startswith("---")
+    assert f"+{TOC_START_TAG}" in diff
+    assert (
+        "+Title 1" not in diff
+    )  # the heading itself is untouched, only TOC lines are added
+
+
+def test_render_diff_empty_when_current(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title 1\n")
+    modify_and_write(md_file)
+
+    assert render_diff(md_file) == ""
+
+
+def test_render_diff_does_not_write(tmp_path):
+    md_file = tmp_path / "test.md"
+    original = "# Title 1\n\n## Subtitle 1.1\n"
+    md_file.write_text(original)
+    mtime_before = md_file.stat().st_mtime
+
+    render_diff(md_file)
+
+    assert md_file.read_text() == original
+    assert md_file.stat().st_mtime == mtime_before
+
+
+def test_cli_dry_run_does_not_write(tmp_path):
+    md_file = tmp_path / "test.md"
+    original = "# Title 1\n\n## Subtitle 1.1\n"
+    md_file.write_text(original)
+
+    result = CliRunner().invoke(main, ["--dry-run", str(md_file)])
+
+    assert result.exit_code == 0
+    assert md_file.read_text() == original
+    assert f"+{TOC_START_TAG}" in result.output
+
+
+def test_cli_dry_run_reports_up_to_date(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title 1\n")
+    modify_and_write(md_file)
+    current = md_file.read_text()
+
+    result = CliRunner().invoke(main, ["--dry-run", str(md_file)])
+
+    assert result.exit_code == 0
+    assert "OK" in result.output
+    assert md_file.read_text() == current
+
+
+def test_cli_dry_run_multiple_files(tmp_path):
+    stale_file = tmp_path / "stale.md"
+    stale_file.write_text("# Title 1\n")
+    other_stale = tmp_path / "other.md"
+    other_stale.write_text("# Title 2\n")
+
+    result = CliRunner().invoke(main, ["--dry-run", str(stale_file), str(other_stale)])
+
+    assert result.exit_code == 0
+    assert stale_file.read_text() == "# Title 1\n"
+    assert other_stale.read_text() == "# Title 2\n"
+    assert str(stale_file) in result.output
+    assert str(other_stale) in result.output
 
 
 def test_cli_check_reports_multiple_files(tmp_path):
