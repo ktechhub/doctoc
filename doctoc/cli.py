@@ -5,7 +5,7 @@ import sys
 import click
 import requests
 
-from .core import is_current, modify_and_write
+from .core import is_current, modify_and_write, render_diff
 from .markdown import MarkdownError, as_link, get_links, headers
 
 REQUEST_TIMEOUT = 10
@@ -93,7 +93,15 @@ def _resolve_paths(patterns):
     help="Exclude headers whose text contains this value from the TOC "
     "(repeatable for multiple exclusions).",
 )
-def main(markdown_files, outfile, check_links, title, max_depth, check, exclude):
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Show what would change (as a unified diff) without writing any files. "
+    "Works with multiple input files.",
+)
+def main(
+    markdown_files, outfile, check_links, title, max_depth, check, exclude, dry_run
+):
     """Generate or update a table of contents for one or more Markdown files.
 
     MARKDOWN_FILES may be file paths or glob patterns (e.g. '**/*.md').
@@ -118,6 +126,16 @@ def main(markdown_files, outfile, check_links, title, max_depth, check, exclude)
                 else:
                     click.echo(click.style(f"STALE: {path} is out of date", fg="red"))
                     had_error = True
+                continue
+
+            if dry_run:
+                diff = render_diff(
+                    path, title=title, max_depth=max_depth, exclude=exclude
+                )
+                if diff:
+                    click.echo(diff, nl=False)
+                else:
+                    click.echo(click.style(f"OK: {path} is up to date", fg="green"))
                 continue
 
             if check_links:
