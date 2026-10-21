@@ -274,6 +274,40 @@ def test_modify_and_write_max_depth(tmp_path):
     assert "H3" not in content.split(TOC_END_TAG)[0]
 
 
+def test_modify_and_write_backup_creates_bak_file(tmp_path):
+    md_file = tmp_path / "test.md"
+    original = "# Title 1\n\n## Subtitle 1.1\n"
+    md_file.write_text(original)
+
+    modify_and_write(md_file, backup=True)
+
+    bak_file = tmp_path / "test.md.bak"
+    assert bak_file.exists()
+    assert bak_file.read_text() == original
+
+
+def test_modify_and_write_no_backup_by_default(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title 1\n")
+
+    modify_and_write(md_file)
+
+    assert not (tmp_path / "test.md.bak").exists()
+
+
+def test_modify_and_write_backup_multiple_files(tmp_path):
+    first = tmp_path / "first.md"
+    second = tmp_path / "second.md"
+    first.write_text("# First\n")
+    second.write_text("# Second\n")
+
+    modify_and_write(first, backup=True)
+    modify_and_write(second, backup=True)
+
+    assert (tmp_path / "first.md.bak").read_text() == "# First\n"
+    assert (tmp_path / "second.md.bak").read_text() == "# Second\n"
+
+
 def test_modify_and_write_is_idempotent(tmp_path):
     # Re-running on a file that already has a current TOC must not change it
     # (previously each re-run inserted an extra blank line, growing the file
@@ -366,6 +400,18 @@ def test_cli_exclude_option(tmp_path):
     toc_section = md_file.read_text().split(TOC_END_TAG)[0]
     assert "Notes" in toc_section
     assert "Appendix" not in toc_section
+
+
+def test_cli_backup_option(tmp_path):
+    md_file = tmp_path / "test.md"
+    original = "# Title\n## Appendix\n"
+    md_file.write_text(original)
+
+    result = CliRunner().invoke(main, ["--backup", str(md_file)])
+    assert result.exit_code == 0
+    bak_file = tmp_path / "test.md.bak"
+    assert bak_file.exists()
+    assert bak_file.read_text() == original
 
 
 def test_cli_exclude_option_multiple_values(tmp_path):

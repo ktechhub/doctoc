@@ -99,8 +99,22 @@ def _resolve_paths(patterns):
     help="Show what would change (as a unified diff) without writing any files. "
     "Works with multiple input files.",
 )
+@click.option(
+    "--backup",
+    is_flag=True,
+    help="Back up each file to <file>.bak with its pre-modification content "
+    "before writing.",
+)
 def main(
-    markdown_files, outfile, check_links, title, max_depth, check, exclude, dry_run
+    markdown_files,
+    outfile,
+    check_links,
+    title,
+    max_depth,
+    check,
+    exclude,
+    dry_run,
+    backup,
 ):
     """Generate or update a table of contents for one or more Markdown files.
 
@@ -143,7 +157,12 @@ def main(
                     original_contents = fp.read()
 
             dest = modify_and_write(
-                path, outfile=outfile, title=title, max_depth=max_depth, exclude=exclude
+                path,
+                outfile=outfile,
+                title=title,
+                max_depth=max_depth,
+                exclude=exclude,
+                backup=backup,
             )
             click.echo(
                 click.style(f"Success: wrote TOC to {dest}", fg="green"), color=True
