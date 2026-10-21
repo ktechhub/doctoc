@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.0](https://github.com/ktechhub/doctoc/compare/v1.4.0...v1.5.0) (2026-10-21)
+
+
+### Features
+
+* add --backup flag to save a .bak copy before modifying files ([4978a90](https://github.com/ktechhub/doctoc/commit/4978a9014f1a580fb36f5c13e3175d412588b786))
+* add --backup flag to save a .bak copy before modifying files ([#46](https://github.com/ktechhub/doctoc/issues/46)) ([33f3242](https://github.com/ktechhub/doctoc/commit/33f3242f308ad63c245515c957a4e47e8ebf2253))
+
 ## [1.4.0](https://github.com/ktechhub/doctoc/compare/v1.3.0...v1.4.0) (2026-10-14)
 
 
