@@ -46,9 +46,15 @@ def _render(markdown, title=None, max_depth=None, exclude=None):
         )
 
 
-def modify_and_write(path, outfile=None, title=None, max_depth=None, exclude=None):
+def modify_and_write(
+    path, outfile=None, title=None, max_depth=None, exclude=None, backup=False
+):
     with open(path) as fp:
         markdown = fp.read()
+
+    if backup:
+        with open(f"{path}.bak", "w") as fp:
+            fp.write(markdown)
 
     new_markdown = _render(markdown, title=title, max_depth=max_depth, exclude=exclude)
 
