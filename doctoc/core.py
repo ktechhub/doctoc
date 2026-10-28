@@ -1,4 +1,5 @@
 import difflib
+import re
 
 from .markdown import toc
 
@@ -23,7 +24,23 @@ def _toc_block(table_of_contents, title):
     )
 
 
-def _render(markdown, title=None, max_depth=None, exclude=None):
+def _insert_index(markdown, after):
+    """Return the offset to insert a fresh TOC block at.
+
+    Defaults to the top of the file (0). If `after` is given, inserts right
+    after the first line containing it; falls back to the top if no line
+    matches.
+    """
+    if after is None:
+        return 0
+
+    match = re.search(
+        r"^.*" + re.escape(after) + r".*\n?", markdown, flags=re.MULTILINE
+    )
+    return match.end() if match else 0
+
+
+def _render(markdown, title=None, max_depth=None, exclude=None, after=None):
     table_of_contents = toc(markdown, max_depth=max_depth, exclude=exclude)
     toc_section = _toc_block(table_of_contents, title)
 
@@ -38,16 +55,23 @@ def _render(markdown, title=None, max_depth=None, exclude=None):
         # blank line on every re-run and make the output grow without bound.
         return markdown[:start_index] + toc_section + markdown[end_index:]
     else:
-        return (
+        insert_at = _insert_index(markdown, after)
+        new_block = (
             toc_section
             + "\n"
             + f"<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->\n"
-            + markdown
         )
+        return markdown[:insert_at] + new_block + markdown[insert_at:]
 
 
 def modify_and_write(
-    path, outfile=None, title=None, max_depth=None, exclude=None, backup=False
+    path,
+    outfile=None,
+    title=None,
+    max_depth=None,
+    exclude=None,
+    backup=False,
+    after=None,
 ):
     with open(path) as fp:
         markdown = fp.read()
@@ -56,7 +80,9 @@ def modify_and_write(
         with open(f"{path}.bak", "w") as fp:
             fp.write(markdown)
 
-    new_markdown = _render(markdown, title=title, max_depth=max_depth, exclude=exclude)
+    new_markdown = _render(
+        markdown, title=title, max_depth=max_depth, exclude=exclude, after=after
+    )
 
     dest = outfile or path
     with open(dest, "w") as fp:
@@ -65,7 +91,7 @@ def modify_and_write(
     return dest
 
 
-def render_diff(path, title=None, max_depth=None, exclude=None):
+def render_diff(path, title=None, max_depth=None, exclude=None, after=None):
     """Return a unified diff of what modify_and_write would change, without writing.
 
     Returns an empty string if path's TOC is already current.
@@ -73,7 +99,9 @@ def render_diff(path, title=None, max_depth=None, exclude=None):
     with open(path) as fp:
         markdown = fp.read()
 
-    new_markdown = _render(markdown, title=title, max_depth=max_depth, exclude=exclude)
+    new_markdown = _render(
+        markdown, title=title, max_depth=max_depth, exclude=exclude, after=after
+    )
     if new_markdown == markdown:
         return ""
 
@@ -88,7 +116,7 @@ def render_diff(path, title=None, max_depth=None, exclude=None):
     )
 
 
-def is_current(path, title=None, max_depth=None, exclude=None):
+def is_current(path, title=None, max_depth=None, exclude=None, after=None):
     """Return True if path's TOC already matches what doctoc would generate.
 
     Never writes to disk.
@@ -97,5 +125,5 @@ def is_current(path, title=None, max_depth=None, exclude=None):
         markdown = fp.read()
 
     return markdown == _render(
-        markdown, title=title, max_depth=max_depth, exclude=exclude
+        markdown, title=title, max_depth=max_depth, exclude=exclude, after=after
     )
