@@ -105,6 +105,15 @@ def _resolve_paths(patterns):
     help="Back up each file to <file>.bak with its pre-modification content "
     "before writing.",
 )
+@click.option(
+    "--after",
+    "-a",
+    default=None,
+    help="On the first run (before TOC markers exist), insert the TOC block "
+    "immediately after the first line containing this text, instead of at "
+    "the top of the file. Ignored if no line matches, and has no effect on "
+    "later runs, which always update the TOC in place.",
+)
 def main(
     markdown_files,
     outfile,
@@ -115,6 +124,7 @@ def main(
     exclude,
     dry_run,
     backup,
+    after,
 ):
     """Generate or update a table of contents for one or more Markdown files.
 
@@ -135,7 +145,13 @@ def main(
     for path in paths:
         try:
             if check:
-                if is_current(path, title=title, max_depth=max_depth, exclude=exclude):
+                if is_current(
+                    path,
+                    title=title,
+                    max_depth=max_depth,
+                    exclude=exclude,
+                    after=after,
+                ):
                     click.echo(click.style(f"OK: {path} is up to date", fg="green"))
                 else:
                     click.echo(click.style(f"STALE: {path} is out of date", fg="red"))
@@ -144,7 +160,11 @@ def main(
 
             if dry_run:
                 diff = render_diff(
-                    path, title=title, max_depth=max_depth, exclude=exclude
+                    path,
+                    title=title,
+                    max_depth=max_depth,
+                    exclude=exclude,
+                    after=after,
                 )
                 if diff:
                     click.echo(diff, nl=False)
@@ -163,6 +183,7 @@ def main(
                 max_depth=max_depth,
                 exclude=exclude,
                 backup=backup,
+                after=after,
             )
             click.echo(
                 click.style(f"Success: wrote TOC to {dest}", fg="green"), color=True

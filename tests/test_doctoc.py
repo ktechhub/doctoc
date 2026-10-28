@@ -323,6 +323,43 @@ def test_modify_and_write_is_idempotent(tmp_path):
     assert once == twice
 
 
+def test_modify_and_write_after_places_toc_past_marker(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title\n\nSome intro text.\n\n## Subtitle\n")
+
+    modify_and_write(md_file, after="Some intro text.")
+    content = md_file.read_text()
+
+    assert content.startswith("# Title\n\nSome intro text.\n")
+    assert not content.startswith(TOC_START_TAG)
+    assert content.index("Some intro text.") < content.index(TOC_START_TAG)
+
+
+def test_modify_and_write_after_falls_back_to_top_when_not_found(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title 1\n\n## Subtitle 1.1\n")
+
+    modify_and_write(md_file, after="nonexistent marker")
+    content = md_file.read_text()
+
+    assert content.startswith(TOC_START_TAG)
+
+
+def test_modify_and_write_after_only_affects_first_run(tmp_path):
+    # Once TOC markers exist, --after is ignored and the TOC updates in
+    # place wherever the markers already are.
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title\n\nSome intro text.\n\n## Subtitle\n")
+
+    modify_and_write(md_file, after="Some intro text.")
+    first_position = md_file.read_text().index(TOC_START_TAG)
+
+    modify_and_write(md_file, after="Some intro text.")
+    second_position = md_file.read_text().index(TOC_START_TAG)
+
+    assert first_position == second_position
+
+
 # ---------------------------------------------------------------------------
 # is_current() / --check
 # ---------------------------------------------------------------------------
@@ -426,6 +463,17 @@ def test_cli_exclude_option_multiple_values(tmp_path):
     assert "Keep" in toc_section
     assert "Appendix" not in toc_section
     assert "Notes" not in toc_section
+
+
+def test_cli_after_option(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Title\n\nIntro text.\n\n## Subtitle\n")
+
+    result = CliRunner().invoke(main, ["--after", "Intro text.", str(md_file)])
+    assert result.exit_code == 0
+    content = md_file.read_text()
+    assert not content.startswith(TOC_START_TAG)
+    assert content.index("Intro text.") < content.index(TOC_START_TAG)
 
 
 # ---------------------------------------------------------------------------
