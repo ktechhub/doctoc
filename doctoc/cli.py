@@ -5,7 +5,7 @@ import sys
 import click
 import requests
 
-from .core import is_current, modify_and_write, render_diff
+from .core import ExistingUnmanagedTocError, is_current, modify_and_write, render_diff
 from .markdown import MarkdownError, as_link, get_links, headers
 
 REQUEST_TIMEOUT = 10
@@ -114,6 +114,14 @@ def _resolve_paths(patterns):
     "the top of the file. Ignored if no line matches, and has no effect on "
     "later runs, which always update the TOC in place.",
 )
+@click.option(
+    "--wrap-existing",
+    is_flag=True,
+    help="If a hand-written 'Table of Contents'-style section (a heading "
+    "followed by a list of links) is found with no doctoc markers, wrap it "
+    "in doctoc's markers instead of refusing to write, so doctoc manages it "
+    "on subsequent runs.",
+)
 def main(
     markdown_files,
     outfile,
@@ -125,6 +133,7 @@ def main(
     dry_run,
     backup,
     after,
+    wrap_existing,
 ):
     """Generate or update a table of contents for one or more Markdown files.
 
@@ -151,6 +160,7 @@ def main(
                     max_depth=max_depth,
                     exclude=exclude,
                     after=after,
+                    wrap_existing=wrap_existing,
                 ):
                     click.echo(click.style(f"OK: {path} is up to date", fg="green"))
                 else:
@@ -165,6 +175,7 @@ def main(
                     max_depth=max_depth,
                     exclude=exclude,
                     after=after,
+                    wrap_existing=wrap_existing,
                 )
                 if diff:
                     click.echo(diff, nl=False)
@@ -184,6 +195,7 @@ def main(
                 exclude=exclude,
                 backup=backup,
                 after=after,
+                wrap_existing=wrap_existing,
             )
             click.echo(
                 click.style(f"Success: wrote TOC to {dest}", fg="green"), color=True
@@ -197,6 +209,9 @@ def main(
             had_error = True
         except MarkdownError as e:
             click.echo(click.style(f"Failed ({path}): {e}", fg="red"), color=True)
+            had_error = True
+        except ExistingUnmanagedTocError as e:
+            click.echo(click.style(f"Skipped ({path}): {e}", fg="yellow"), color=True)
             had_error = True
 
     if had_error:

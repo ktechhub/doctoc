@@ -3,6 +3,7 @@ from click.testing import CliRunner
 from doctoc.cli import main
 from doctoc.markdown import as_link, escape, get_links, headers, toc
 from doctoc.core import (
+    ExistingUnmanagedTocError,
     is_current,
     modify_and_write,
     render_diff,
@@ -564,6 +565,99 @@ def test_cli_check_reports_multiple_files(tmp_path):
     assert result.exit_code != 0
     assert f"STALE: {stale_file}" in result.output
     assert f"OK: {current_file}" in result.output
+
+
+# ---------------------------------------------------------------------------
+# existing unmanaged TOC detection / --wrap-existing
+# ---------------------------------------------------------------------------
+
+
+def test_modify_and_write_refuses_on_existing_unmanaged_toc(tmp_path):
+    md_file = tmp_path / "test.md"
+    original = (
+        "## Table of Contents\n\n" "* [H1](#h1)\n" "* [H2](#h2)\n\n" "# H1\n## H2\n"
+    )
+    md_file.write_text(original)
+
+    with pytest.raises(ExistingUnmanagedTocError):
+        modify_and_write(md_file)
+
+    # Refusing to write means the file is left completely untouched -- no
+    # second TOC block gets inserted above the hand-written one.
+    assert md_file.read_text() == original
+
+
+def test_modify_and_write_wrap_existing_wraps_section(tmp_path):
+    md_file = tmp_path / "test.md"
+    original = (
+        "## Table of Contents\n\n" "* [H1](#h1)\n" "* [H2](#h2)\n\n" "# H1\n## H2\n"
+    )
+    md_file.write_text(original)
+
+    modify_and_write(md_file, wrap_existing=True)
+    content = md_file.read_text()
+
+    assert content.count(TOC_START_TAG) == 1
+    assert content.count(TOC_END_TAG) == 1
+    assert content.index(TOC_START_TAG) < content.index("## Table of Contents")
+    assert content.index("## Table of Contents") < content.index(TOC_END_TAG)
+    assert "[H1](#h1)" in content
+    assert "[H2](#h2)" in content
+
+
+def test_modify_and_write_wrapped_toc_updates_normally_on_next_run(tmp_path):
+    md_file = tmp_path / "test.md"
+    original = "## Table of Contents\n\n* [Old](#old)\n\n# New Header\n"
+    md_file.write_text(original)
+
+    modify_and_write(md_file, wrap_existing=True)
+    modify_and_write(md_file)
+    content = md_file.read_text()
+
+    assert "New Header" in content
+    assert "Old" not in content
+
+
+def test_modify_and_write_heading_without_links_is_not_treated_as_toc(tmp_path):
+    # A heading literally titled "Table of Contents" that isn't actually
+    # followed by a list of links is a false positive and must not trigger
+    # the refusal -- doctoc just inserts its own TOC block as usual.
+    md_file = tmp_path / "test.md"
+    original = (
+        "## Table of Contents\n\n"
+        "This document covers three topics in detail.\n\n"
+        "# H1\n## H2\n"
+    )
+    md_file.write_text(original)
+
+    modify_and_write(md_file)
+    content = md_file.read_text()
+
+    assert content.count(TOC_START_TAG) == 1
+    assert "This document covers three topics in detail." in content
+
+
+def test_cli_existing_unmanaged_toc_without_flag_errors(tmp_path):
+    md_file = tmp_path / "test.md"
+    original = "## Table of Contents\n\n* [H1](#h1)\n\n# H1\n"
+    md_file.write_text(original)
+
+    result = CliRunner().invoke(main, [str(md_file)])
+
+    assert result.exit_code != 0
+    assert md_file.read_text() == original
+
+
+def test_cli_wrap_existing_option(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("## Table of Contents\n\n* [H1](#h1)\n\n# H1\n")
+
+    result = CliRunner().invoke(main, ["--wrap-existing", str(md_file)])
+
+    assert result.exit_code == 0
+    content = md_file.read_text()
+    assert content.count(TOC_START_TAG) == 1
+    assert content.count(TOC_END_TAG) == 1
 
 
 if __name__ == "__main__":
