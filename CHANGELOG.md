@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.0](https://github.com/ktechhub/doctoc/compare/v1.5.0...v1.6.0) (2026-11-07)
+
+
+### Features
+
+* detect and preserve hand-written Table of Contents sections ([d8b712f](https://github.com/ktechhub/doctoc/commit/d8b712f99efaf49a1b34763948a94b83ed423816))
+* detect and preserve hand-written Table of Contents sections ([#49](https://github.com/ktechhub/doctoc/issues/49)) ([d545227](https://github.com/ktechhub/doctoc/commit/d545227d87c7eb34b191b21abd3de8a50d8211fe))
+
 ## [1.5.0](https://github.com/ktechhub/doctoc/compare/v1.4.0...v1.5.0) (2026-10-28)
 
 
