@@ -15,7 +15,7 @@ _TOC_HEADER_TEMPLATE = "**Table of Contents**  *generated with [DocToc](https://
 # Matches a heading whose text is just "Table of Contents", "Contents", or
 # "TOC" (optionally followed by a colon) -- the common hand-written variants.
 _EXISTING_TOC_HEADING_PAT = re.compile(
-    r"^[ \t]{0,3}#{1,6}[ \t]+(table of contents|contents|toc)[ \t:]*$",
+    r"^[ \t]{0,3}#{1,6}[ \t]+(table of contents|contents|toc)[ \t:]*\r?$",
     re.IGNORECASE | re.MULTILINE,
 )
 

@@ -46,6 +46,16 @@ def test_headers_ignores_indented_code_block():
     assert not any(h == "not a header (4 spaces)" for _, h in result)
 
 
+def test_headers_strips_crlf_line_endings():
+    md = "# Title\r\n## Body\r\n"
+    assert list(headers(md)) == [(1, "Title"), (2, "Body")]
+
+
+def test_toc_ignores_crlf_line_endings():
+    md = "# Title\r\n# Body\r\n"
+    assert toc(md) == "* [Title](#title)\n* [Body](#body)"
+
+
 # ---------------------------------------------------------------------------
 # as_link()
 # ---------------------------------------------------------------------------
@@ -658,6 +668,15 @@ def test_cli_wrap_existing_option(tmp_path):
     content = md_file.read_text()
     assert content.count(TOC_START_TAG) == 1
     assert content.count(TOC_END_TAG) == 1
+
+
+def test_find_existing_toc_section_crlf():
+    # String-level input keeps its carriage returns (unlike text-mode file
+    # reads), so a CRLF hand-written TOC must still be detected.
+    from doctoc.core import _find_existing_toc_section
+
+    md = "## Table of Contents\r\n\r\n* [H1](#h1)\r\n\r\n# H1\r\n"
+    assert _find_existing_toc_section(md) is not None
 
 
 if __name__ == "__main__":

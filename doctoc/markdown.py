@@ -103,6 +103,10 @@ def headers(md_string):
     fence_marker = None
 
     for line in md_string.split("\n"):
+        # Tolerate CRLF files: a trailing "\r" is a line ending, not
+        # heading text (otherwise it leaks into TOC labels and slugs).
+        if line.endswith("\r"):
+            line = line[:-1]
         fence_match = FENCE_PAT.match(line)
         if fence_match:
             marker = fence_match.group(1)
