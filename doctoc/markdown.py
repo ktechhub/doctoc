@@ -66,10 +66,12 @@ def get_links(md_string):
             yield link_text, link_url, line_number, col_start
 
 
-def toc(md_string, max_depth=None, exclude=None):
+def toc(md_string, max_depth=None, exclude=None, numbered=False):
     entries = []
     n_seen = collections.defaultdict(int)
     min_level = None
+    counters = collections.defaultdict(int)
+    last_indent = -1
 
     for level, header in headers(md_string):
         if max_depth is not None and level > max_depth:
@@ -88,9 +90,22 @@ def toc(md_string, max_depth=None, exclude=None):
             n_seen[link] += 1
 
         indent = max(0, level - min_level)
+
+        if numbered:
+            # Numbering restarts for any depth deeper than the one we're
+            # returning to, so each nested list counts from 1 again.
+            for deeper in range(indent + 1, last_indent + 1):
+                counters[deeper] = 0
+            counters[indent] += 1
+            last_indent = indent
+            marker = f"{counters[indent]}."
+        else:
+            marker = "*"
+
         entries.append(
-            "{spaces}* [{header}](#{link})".format(
+            "{spaces}{marker} [{header}](#{link})".format(
                 spaces="  " * indent,
+                marker=marker,
                 header=escape(_strip(header)),
                 link=link,
             )

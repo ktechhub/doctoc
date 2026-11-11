@@ -122,6 +122,12 @@ def _resolve_paths(patterns):
     "in doctoc's markers instead of refusing to write, so doctoc manages it "
     "on subsequent runs.",
 )
+@click.option(
+    "--numbered",
+    "-n",
+    is_flag=True,
+    help="Render TOC entries as a numbered list instead of bullets.",
+)
 def main(
     markdown_files,
     outfile,
@@ -134,6 +140,7 @@ def main(
     backup,
     after,
     wrap_existing,
+    numbered,
 ):
     """Generate or update a table of contents for one or more Markdown files.
 
@@ -161,6 +168,7 @@ def main(
                     exclude=exclude,
                     after=after,
                     wrap_existing=wrap_existing,
+                    numbered=numbered,
                 ):
                     click.echo(click.style(f"OK: {path} is up to date", fg="green"))
                 else:
@@ -176,6 +184,7 @@ def main(
                     exclude=exclude,
                     after=after,
                     wrap_existing=wrap_existing,
+                    numbered=numbered,
                 )
                 if diff:
                     click.echo(diff, nl=False)
@@ -196,6 +205,7 @@ def main(
                 backup=backup,
                 after=after,
                 wrap_existing=wrap_existing,
+                numbered=numbered,
             )
             click.echo(
                 click.style(f"Success: wrote TOC to {dest}", fg="green"), color=True
