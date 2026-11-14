@@ -87,9 +87,17 @@ def _insert_index(markdown, after):
 
 
 def _render(
-    markdown, title=None, max_depth=None, exclude=None, after=None, wrap_existing=False
+    markdown,
+    title=None,
+    max_depth=None,
+    exclude=None,
+    after=None,
+    wrap_existing=False,
+    numbered=False,
 ):
-    table_of_contents = toc(markdown, max_depth=max_depth, exclude=exclude)
+    table_of_contents = toc(
+        markdown, max_depth=max_depth, exclude=exclude, numbered=numbered
+    )
     toc_section = _toc_block(table_of_contents, title)
 
     start_index = markdown.find(TOC_START_TAG)
@@ -141,6 +149,7 @@ def modify_and_write(
     backup=False,
     after=None,
     wrap_existing=False,
+    numbered=False,
 ):
     with open(path) as fp:
         markdown = fp.read()
@@ -156,6 +165,7 @@ def modify_and_write(
         exclude=exclude,
         after=after,
         wrap_existing=wrap_existing,
+        numbered=numbered,
     )
 
     dest = outfile or path
@@ -166,7 +176,13 @@ def modify_and_write(
 
 
 def render_diff(
-    path, title=None, max_depth=None, exclude=None, after=None, wrap_existing=False
+    path,
+    title=None,
+    max_depth=None,
+    exclude=None,
+    after=None,
+    wrap_existing=False,
+    numbered=False,
 ):
     """Return a unified diff of what modify_and_write would change, without writing.
 
@@ -182,6 +198,7 @@ def render_diff(
         exclude=exclude,
         after=after,
         wrap_existing=wrap_existing,
+        numbered=numbered,
     )
     if new_markdown == markdown:
         return ""
@@ -198,7 +215,13 @@ def render_diff(
 
 
 def is_current(
-    path, title=None, max_depth=None, exclude=None, after=None, wrap_existing=False
+    path,
+    title=None,
+    max_depth=None,
+    exclude=None,
+    after=None,
+    wrap_existing=False,
+    numbered=False,
 ):
     """Return True if path's TOC already matches what doctoc would generate.
 
@@ -214,4 +237,5 @@ def is_current(
         exclude=exclude,
         after=after,
         wrap_existing=wrap_existing,
+        numbered=numbered,
     )

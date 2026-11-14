@@ -212,6 +212,31 @@ def test_toc_exclude_preserves_nesting_of_remaining_headers():
     assert lines[1].startswith("  * [H2]")
 
 
+def test_toc_numbered_default_unchanged():
+    md = "# H1\n## H2"
+    assert toc(md) == toc(md, numbered=False)
+
+
+def test_toc_numbered_flat():
+    md = "# H1\n# H2\n# H3"
+    result = toc(md, numbered=True)
+    lines = result.split("\n")
+    assert lines[0] == "1. [H1](#h1)"
+    assert lines[1] == "2. [H2](#h2)"
+    assert lines[2] == "3. [H3](#h3)"
+
+
+def test_toc_numbered_nested_restarts_per_level():
+    md = "# First\n## Alpha\n## Beta\n# Second\n## Gamma"
+    result = toc(md, numbered=True)
+    lines = result.split("\n")
+    assert lines[0] == "1. [First](#first)"
+    assert lines[1] == "  1. [Alpha](#alpha)"
+    assert lines[2] == "  2. [Beta](#beta)"
+    assert lines[3] == "2. [Second](#second)"
+    assert lines[4] == "  1. [Gamma](#gamma)"
+
+
 # ---------------------------------------------------------------------------
 # modify_and_write()
 # ---------------------------------------------------------------------------
