@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.7.0](https://github.com/ktechhub/doctoc/compare/v1.6.0...v1.7.0) (2026-11-14)
+
+
+### Features
+
+* add --numbered option to render TOC entries as a numbered list ([#52](https://github.com/ktechhub/doctoc/issues/52)) ([a34b622](https://github.com/ktechhub/doctoc/commit/a34b622956ce30d2b77816cc42a25aa9d9f70341))
+
+
+### Bug Fixes
+
+* pin click back to 8.1.8, 8.5.1 drops Python 3.9 support ([#55](https://github.com/ktechhub/doctoc/issues/55)) ([691b762](https://github.com/ktechhub/doctoc/commit/691b76289d214c5f49497acd04a8a534afd6d365))
+
 ## [1.6.0](https://github.com/ktechhub/doctoc/compare/v1.5.0...v1.6.0) (2026-11-07)
 
 
