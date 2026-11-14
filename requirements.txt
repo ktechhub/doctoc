@@ -1,4 +1,4 @@
-click==8.5.1
+click==8.1.8
 packaging==26.3
 requests==2.32.5
 black
