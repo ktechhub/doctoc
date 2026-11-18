@@ -11,45 +11,71 @@ from .markdown import MarkdownError, as_link, get_links, headers
 REQUEST_TIMEOUT = 10
 
 
-def _check_links(markdown_file, contents):
-    click.echo(
-        click.style(f"Checking hyperlinks in {markdown_file}...", fg="yellow"),
-        color=True,
-    )
+def _check_links(markdown_file, contents, on_invalid_link="warn"):
+    verbose = on_invalid_link != "ignore"
+    if verbose:
+        click.echo(
+            click.style(f"Checking hyperlinks in {markdown_file}...", fg="yellow"),
+            color=True,
+        )
     valid_http_fragments = {"#" + as_link(h) for (_, h) in headers(contents)}
+
+    counts = {"valid": 0, "invalid": 0, "timeout": 0, "error": 0, "unrecognized": 0}
 
     for text, link, _, _ in get_links(contents):
         label = f"[{text}]({link})"
         if link.startswith("#"):
             ok = link in valid_http_fragments
-            click.echo(
-                click.style(
-                    f"{'VALID' if ok else 'INVALID'}: {label}",
-                    fg="green" if ok else "red",
-                ),
-                color=True,
-            )
+            counts["valid" if ok else "invalid"] += 1
+            if verbose:
+                click.echo(
+                    click.style(
+                        f"{'VALID' if ok else 'INVALID'}: {label}",
+                        fg="green" if ok else "red",
+                    ),
+                    color=True,
+                )
         elif link.startswith("http://") or link.startswith("https://"):
             try:
                 r = requests.get(link, timeout=REQUEST_TIMEOUT)
                 ok = r.status_code < 400
             except requests.exceptions.Timeout:
-                click.echo(click.style(f"TIMEOUT: {label}", fg="yellow"), color=True)
+                counts["timeout"] += 1
+                if verbose:
+                    click.echo(
+                        click.style(f"TIMEOUT: {label}", fg="yellow"), color=True
+                    )
                 continue
             except requests.exceptions.RequestException as e:
-                click.echo(click.style(f"ERROR: {label} ({e})", fg="red"), color=True)
+                counts["error"] += 1
+                if verbose:
+                    click.echo(
+                        click.style(f"ERROR: {label} ({e})", fg="red"), color=True
+                    )
                 continue
-            click.echo(
-                click.style(
-                    f"{'VALID' if ok else 'INVALID'}: {label}",
-                    fg="green" if ok else "red",
-                ),
-                color=True,
-            )
+            counts["valid" if ok else "invalid"] += 1
+            if verbose:
+                status = f"{'VALID' if ok else 'INVALID'} ({r.status_code})"
+                if r.history:
+                    status += f" [redirected to {r.url}]"
+                click.echo(
+                    click.style(f"{status}: {label}", fg="green" if ok else "red"),
+                    color=True,
+                )
         else:
-            click.echo(
-                click.style(f"UNRECOGNIZED LINK TYPE: {label}", fg="yellow"), color=True
-            )
+            counts["unrecognized"] += 1
+            if verbose:
+                click.echo(
+                    click.style(f"UNRECOGNIZED LINK TYPE: {label}", fg="yellow"),
+                    color=True,
+                )
+
+    if verbose:
+        summary = ", ".join(f"{n} {cat}" for cat, n in counts.items() if n)
+        if summary:
+            click.echo(click.style(f"Summary: {summary}", fg="cyan"), color=True)
+
+    return counts["invalid"] + counts["timeout"] + counts["error"] > 0
 
 
 def _resolve_paths(patterns):
@@ -128,6 +154,14 @@ def _resolve_paths(patterns):
     is_flag=True,
     help="Render TOC entries as a numbered list instead of bullets.",
 )
+@click.option(
+    "--on-invalid-link",
+    type=click.Choice(["ignore", "warn", "error"]),
+    default="warn",
+    help="How to handle invalid links found by --check-links: 'warn' (default) "
+    "prints them but exits 0, 'error' prints them and exits non-zero if any "
+    "link failed, 'ignore' suppresses link-check output entirely.",
+)
 def main(
     markdown_files,
     outfile,
@@ -141,6 +175,7 @@ def main(
     after,
     wrap_existing,
     numbered,
+    on_invalid_link,
 ):
     """Generate or update a table of contents for one or more Markdown files.
 
@@ -212,7 +247,11 @@ def main(
             )
 
             if check_links:
-                _check_links(path, original_contents)
+                any_failed = _check_links(
+                    path, original_contents, on_invalid_link=on_invalid_link
+                )
+                if on_invalid_link == "error" and any_failed:
+                    had_error = True
 
         except OSError as e:
             click.echo(click.style(f"Failed ({path}): {e}", fg="red"), color=True)
