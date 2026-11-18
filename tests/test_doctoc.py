@@ -1,3 +1,5 @@
+from unittest.mock import patch, MagicMock
+
 import pytest
 from click.testing import CliRunner
 from doctoc.cli import main
@@ -683,6 +685,91 @@ def test_cli_wrap_existing_option(tmp_path):
     content = md_file.read_text()
     assert content.count(TOC_START_TAG) == 1
     assert content.count(TOC_END_TAG) == 1
+
+
+def _mock_response(status_code=200, history=None, url="https://example.com"):
+    response = MagicMock()
+    response.status_code = status_code
+    response.history = history or []
+    response.url = url
+    return response
+
+
+def test_check_links_shows_status_code_for_invalid(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# H1\n\n[broken](https://example.com/broken)\n")
+
+    with patch("doctoc.cli.requests.get", return_value=_mock_response(404)):
+        result = CliRunner().invoke(main, ["--check-links", str(md_file)])
+
+    assert result.exit_code == 0
+    assert "INVALID (404)" in result.output
+
+
+def test_check_links_reports_redirect(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# H1\n\n[moved](https://example.com/moved)\n")
+
+    redirected = _mock_response(
+        200, history=[_mock_response(301)], url="https://example.com/final"
+    )
+    with patch("doctoc.cli.requests.get", return_value=redirected):
+        result = CliRunner().invoke(main, ["--check-links", str(md_file)])
+
+    assert result.exit_code == 0
+    assert "redirected to https://example.com/final" in result.output
+
+
+def test_check_links_summary_line(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text(
+        "# H1\n\n[good](https://example.com/good)\n[bad](https://example.com/bad)\n"
+    )
+
+    responses = [_mock_response(200), _mock_response(404)]
+    with patch("doctoc.cli.requests.get", side_effect=responses):
+        result = CliRunner().invoke(main, ["--check-links", str(md_file)])
+
+    assert result.exit_code == 0
+    assert "Summary: 1 valid, 1 invalid" in result.output
+
+
+def test_check_links_on_invalid_link_default_warn_exits_zero(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# H1\n\n[broken](https://example.com/broken)\n")
+
+    with patch("doctoc.cli.requests.get", return_value=_mock_response(404)):
+        result = CliRunner().invoke(main, ["--check-links", str(md_file)])
+
+    assert result.exit_code == 0
+    assert "INVALID" in result.output
+
+
+def test_check_links_on_invalid_link_error_exits_nonzero(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# H1\n\n[broken](https://example.com/broken)\n")
+
+    with patch("doctoc.cli.requests.get", return_value=_mock_response(404)):
+        result = CliRunner().invoke(
+            main, ["--check-links", "--on-invalid-link", "error", str(md_file)]
+        )
+
+    assert result.exit_code != 0
+    assert "INVALID" in result.output
+
+
+def test_check_links_on_invalid_link_ignore_suppresses_output(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# H1\n\n[broken](https://example.com/broken)\n")
+
+    with patch("doctoc.cli.requests.get", return_value=_mock_response(404)):
+        result = CliRunner().invoke(
+            main, ["--check-links", "--on-invalid-link", "ignore", str(md_file)]
+        )
+
+    assert result.exit_code == 0
+    assert "INVALID" not in result.output
+    assert "Checking hyperlinks" not in result.output
 
 
 if __name__ == "__main__":
