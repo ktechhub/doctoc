@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/ktechhub/doctoc/compare/v1.7.0...v1.8.0) (2026-11-18)
+
+
+### Features
+
+* add link-check severity levels and richer reporting ([#56](https://github.com/ktechhub/doctoc/issues/56)) ([1751c8a](https://github.com/ktechhub/doctoc/commit/1751c8a28bb3b04447538beba6731b147d73d999))
+
 ## [1.7.0](https://github.com/ktechhub/doctoc/compare/v1.6.0...v1.7.0) (2026-11-14)
 
 
