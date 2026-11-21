@@ -46,7 +46,7 @@ produces a double-hyphen (`1. My first header` → `1--my-first-header`).
 
 ## Conventions
 
-- **Formatting**: Black only, enforced by CI (`.github/workflows/ci.yaml`, Python 3.9–3.12 matrix).
+- **Formatting**: Black only, enforced by CI (`.github/workflows/ci.yaml`, Python 3.10–3.12 matrix).
 - **Commit types** (`contribution.md`): `feat`, `fix`, `hotfix`, `refactor`, `docs`, `style`, `test`,
   `chore`, `perf`, `ci`, `build` — enforced on PR titles by `pr-title.yaml`
   (`amannn/action-semantic-pull-request`).
