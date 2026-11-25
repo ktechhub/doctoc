@@ -5,7 +5,13 @@ import sys
 import click
 import requests
 
-from .core import ExistingUnmanagedTocError, is_current, modify_and_write, render_diff
+from .core import (
+    TOC_START_TAG,
+    ExistingUnmanagedTocError,
+    is_current,
+    modify_and_write,
+    render_diff,
+)
 from .markdown import MarkdownError, as_link, get_links, headers
 
 REQUEST_TIMEOUT = 10
@@ -162,6 +168,14 @@ def _resolve_paths(patterns):
     "prints them but exits 0, 'error' prints them and exits non-zero if any "
     "link failed, 'ignore' suppresses link-check output entirely.",
 )
+@click.option(
+    "--verbose",
+    "-v",
+    is_flag=True,
+    help="Print extra detail per file: header count found, whether an "
+    "existing TOC block was updated or a new one inserted, and (with "
+    "--check-links) how many links were checked.",
+)
 def main(
     markdown_files,
     outfile,
@@ -176,6 +190,7 @@ def main(
     wrap_existing,
     numbered,
     on_invalid_link,
+    verbose,
 ):
     """Generate or update a table of contents for one or more Markdown files.
 
@@ -227,9 +242,17 @@ def main(
                     click.echo(click.style(f"OK: {path} is up to date", fg="green"))
                 continue
 
-            if check_links:
+            if check_links or verbose:
                 with open(path) as fp:
                     original_contents = fp.read()
+
+            if verbose:
+                header_count = len(list(headers(original_contents)))
+                toc_status = (
+                    "updated existing TOC block"
+                    if TOC_START_TAG in original_contents
+                    else "inserted new TOC block"
+                )
 
             dest = modify_and_write(
                 path,
@@ -246,7 +269,21 @@ def main(
                 click.style(f"Success: wrote TOC to {dest}", fg="green"), color=True
             )
 
+            if verbose:
+                click.echo(
+                    click.style(
+                        f"  Headers found: {header_count}, {toc_status}", fg="cyan"
+                    ),
+                    color=True,
+                )
+
             if check_links:
+                if verbose:
+                    link_count = len(list(get_links(original_contents)))
+                    click.echo(
+                        click.style(f"  Links checked: {link_count}", fg="cyan"),
+                        color=True,
+                    )
                 any_failed = _check_links(
                     path, original_contents, on_invalid_link=on_invalid_link
                 )
