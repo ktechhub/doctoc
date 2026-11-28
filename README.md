@@ -28,7 +28,7 @@ DocToc is a command-line tool that automatically generates and updates a table o
 
 ## Prerequisites
 
-- Python 3.8+
+- Python 3.10+
 - pip
 
 ## Installation
