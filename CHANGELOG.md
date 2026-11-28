@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.1](https://github.com/ktechhub/doctoc/compare/v1.9.0...v1.9.1) (2026-11-28)
+
+
+### Bug Fixes
+
+* drop Python 3.9 support from CI and package metadata ([#63](https://github.com/ktechhub/doctoc/issues/63)) ([35d06d7](https://github.com/ktechhub/doctoc/commit/35d06d78b7c3a648dc1de76e56cbd2be7e3a57b7))
+
 ## [1.9.0](https://github.com/ktechhub/doctoc/compare/v1.8.0...v1.9.0) (2026-11-28)
 
 
