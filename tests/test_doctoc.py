@@ -772,5 +772,48 @@ def test_check_links_on_invalid_link_ignore_suppresses_output(tmp_path):
     assert "Checking hyperlinks" not in result.output
 
 
+def test_cli_verbose_off_by_default(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# H1\n\n## H2\n")
+
+    result = CliRunner().invoke(main, [str(md_file)])
+
+    assert result.exit_code == 0
+    assert "Headers found" not in result.output
+    assert "TOC block" not in result.output
+
+
+def test_cli_verbose_reports_header_count_and_insert(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# H1\n\n## H2\n")
+
+    result = CliRunner().invoke(main, ["--verbose", str(md_file)])
+
+    assert result.exit_code == 0
+    assert "Headers found: 2" in result.output
+    assert "inserted new TOC block" in result.output
+
+
+def test_cli_verbose_reports_update_on_existing_toc(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text(f"{TOC_START_TAG}\n\nstale\n\n{TOC_END_TAG}\n\n# H1\n")
+
+    result = CliRunner().invoke(main, ["--verbose", str(md_file)])
+
+    assert result.exit_code == 0
+    assert "Headers found: 1" in result.output
+    assert "updated existing TOC block" in result.output
+
+
+def test_cli_verbose_with_check_links_reports_link_count(tmp_path):
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# H1\n\n## H2\n\n[to h2](#h2)\n")
+
+    result = CliRunner().invoke(main, ["--verbose", "--check-links", str(md_file)])
+
+    assert result.exit_code == 0
+    assert "Links checked: 1" in result.output
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
