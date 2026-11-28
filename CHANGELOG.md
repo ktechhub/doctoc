@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/ktechhub/doctoc/compare/v1.8.0...v1.9.0) (2026-11-28)
+
+
+### Features
+
+* add --verbose flag for detailed per-file output ([#59](https://github.com/ktechhub/doctoc/issues/59)) ([b5f04ad](https://github.com/ktechhub/doctoc/commit/b5f04ad295bf34d45210adea19df971dc3d4985f))
+
 ## [1.8.0](https://github.com/ktechhub/doctoc/compare/v1.7.0...v1.8.0) (2026-11-18)
 
 
